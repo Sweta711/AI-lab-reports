@@ -1,0 +1,107 @@
+import numpy as np
+from queue import PriorityQueue
+
+class NPuzzle:
+    def __init__(self, start_state, goal_state):
+        self.start_state = start_state
+        self.goal_state = goal_state
+        self.n = len(start_state)
+
+    def find_blank(self, state):
+        for i in range(self.n):
+            for j in range(self.n):
+                if state[i][j] == 0:
+                    return i, j
+
+    def is_goal(self, state):
+        return state == self.goal_state
+
+    def find_position(self, value, goal_state):
+        for i in range(len(goal_state)):
+            for j in range(len(goal_state[i])):
+                if goal_state[i][j] == value:
+                    return i, j
+
+    def heuristic(self, state):
+        # Using Manhattan distance as the heuristic
+        distance = 0
+        for i in range(self.n):
+            for j in range(self.n):
+                if state[i][j] != 0:  # Ignore the blank space
+                    x, y = self.find_position(state[i][j], self.goal_state)
+                    distance += abs(x - i) + abs(y - j)
+        return distance
+
+    def possible_moves(self, state):
+        moves = []
+        x, y = self.find_blank(state)
+        directions = [(0, 1), (1, 0), (0, -1), (-1, 0)]  # Right, Down, Left, Up
+
+        for dx, dy in directions:
+            nx, ny = x + dx, y + dy
+            if 0 <= nx < self.n and 0 <= ny < self.n:
+                new_state = [row[:] for row in state]
+                new_state[x][y], new_state[nx][ny] = new_state[nx][ny], new_state[x][y]
+                moves.append(new_state)
+
+        return moves
+
+    def solve(self):
+        open_set = PriorityQueue()
+        open_set.put((0, self.start_state, 0, None))  # (f_score, state, g_score, parent)
+        came_from = {}
+        g_scores = {str(self.start_state): 0}
+
+        while not open_set.empty():
+            _, current, g_score, parent = open_set.get()
+
+            if self.is_goal(current):
+                solution = []
+                while parent:
+                    solution.append(current)
+                    current, parent = parent
+                solution.append(current)
+                return solution[::-1]
+
+            for move in self.possible_moves(current):
+                move_str = str(move)
+                tentative_g_score = g_score + 1
+
+                if move_str not in g_scores or tentative_g_score < g_scores[move_str]:
+                    g_scores[move_str] = tentative_g_score
+                    f_score = tentative_g_score + self.heuristic(move)
+                    open_set.put((f_score, move, tentative_g_score, (current, parent)))
+
+        return None
+
+# Example usage:
+if __name__ == "__main__":
+    start = [[1, 2, 3], [4, 0, 5], [7, 8, 6]]
+    goal = [[1, 2, 3], [4, 5, 6], [7, 8, 0]]
+
+    puzzle = NPuzzle(start, goal)
+    solution = puzzle.solve()
+
+    if solution:
+        print("Solution found!")
+        for step in solution:
+            for row in step:
+                print(row)
+            print()
+    else:
+        print("No solution exists.")
+
+
+output:
+Solution found!
+[1, 2, 3]
+[4, 0, 5]
+[7, 8, 6]
+
+[1, 2, 3]
+[4, 5, 0]
+[7, 8, 6]
+
+[1, 2, 3]
+[4, 5, 6]
+[7, 8, 0]
