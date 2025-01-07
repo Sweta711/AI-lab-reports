@@ -121,6 +121,7 @@ if __name__ == "__main__":
         print("No solution found")
 
 
+Output:
 Solution using BFS:
 (4, 0)
 (1, 3)
