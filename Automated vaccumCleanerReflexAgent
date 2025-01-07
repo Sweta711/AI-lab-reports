@@ -1,0 +1,150 @@
+import random
+
+class ReflexVacuumCleaner:
+    def __init__(self, room_size=(5, 5)):
+        self.room_size = room_size
+        # Initialize the room as a grid with random 0 (clean) and 1 (dirty) cells
+        self.grid = [[random.choice([0, 1]) for _ in range(room_size[1])] for _ in range(room_size[0])]
+        # Agent's current position starts randomly
+        self.current_position = (random.randint(0, room_size[0] - 1), random.randint(0, room_size[1] - 1))
+
+    def display_room(self):
+        # Display the current status of the room
+        for row in self.grid:
+            print(' '.join(str(cell) for cell in row))
+        print("\n")
+
+    def perceive(self):
+        # Perceive the cleanliness of the current cell
+        x, y = self.current_position
+        return self.grid[x][y]
+
+    def act(self):
+        # Perform action based on the perception
+        x, y = self.current_position
+        if self.perceive() == 1:  # If the current cell is dirty
+            print(f"Cell ({x}, {y}) is Dirty. Cleaning...")
+            self.grid[x][y] = 0  # Clean the cell
+            print(f"Cell ({x}, {y}) is now Clean.")
+        else:
+            print(f"Cell ({x}, {y}) is already Clean.")
+
+    def move(self):
+        # Move systematically to cover the entire room row by row
+        x, y = self.current_position
+        if y < self.room_size[1] - 1:  # Move to the next cell in the same row
+            self.current_position = (x, y + 1)
+        elif x < self.room_size[0] - 1:  # Move to the first cell of the next row
+            self.current_position = (x + 1, 0)
+        else:
+            self.current_position = None  # All cells have been visited
+
+    def is_room_clean(self):
+        # Check if the entire room is clean
+        return all(cell == 0 for row in self.grid for cell in row)
+
+    def run(self):
+        # Display the initial state of the room
+        print("Initial Room State:")
+        self.display_room()
+
+        steps = 0
+        while not self.is_room_clean():
+            print(f"Step {steps + 1}:")
+            self.act()
+            self.move()
+            steps += 1
+            if self.current_position is None:
+                # Restart from the top-left corner if needed to ensure all cells are visited
+                self.current_position = (0, 0)
+
+        # Display the final state of the room
+        print("\nFinal Room State:")
+        self.display_room()
+        print(f"Room cleaned in {steps} steps.")
+
+
+# Create and run the Reflex Vacuum Cleaner Agent
+agent = ReflexVacuumCleaner()
+agent.run()
+
+
+OUTPUT:
+Initial Room State:
+0 0 1 1 0
+1 1 0 1 1
+0 0 1 0 0
+1 0 0 1 0
+0 1 0 0 0
+
+
+Step 1:
+Cell (1, 2) is already Clean.
+Step 2:
+Cell (1, 3) is Dirty. Cleaning...
+Cell (1, 3) is now Clean.
+Step 3:
+Cell (1, 4) is Dirty. Cleaning...
+Cell (1, 4) is now Clean.
+Step 4:
+Cell (2, 0) is already Clean.
+Step 5:
+Cell (2, 1) is already Clean.
+Step 6:
+Cell (2, 2) is Dirty. Cleaning...
+Cell (2, 2) is now Clean.
+Step 7:
+Cell (2, 3) is already Clean.
+Step 8:
+Cell (2, 4) is already Clean.
+Step 9:
+Cell (3, 0) is Dirty. Cleaning...
+Cell (3, 0) is now Clean.
+Step 10:
+Cell (3, 1) is already Clean.
+Step 11:
+Cell (3, 2) is already Clean.
+Step 12:
+Cell (3, 3) is Dirty. Cleaning...
+Cell (3, 3) is now Clean.
+Step 13:
+Cell (3, 4) is already Clean.
+Step 14:
+Cell (4, 0) is already Clean.
+Step 15:
+Cell (4, 1) is Dirty. Cleaning...
+Cell (4, 1) is now Clean.
+Step 16:
+Cell (4, 2) is already Clean.
+Step 17:
+Cell (4, 3) is already Clean.
+Step 18:
+Cell (4, 4) is already Clean.
+Step 19:
+Cell (0, 0) is already Clean.
+Step 20:
+Cell (0, 1) is already Clean.
+Step 21:
+Cell (0, 2) is Dirty. Cleaning...
+Cell (0, 2) is now Clean.
+Step 22:
+Cell (0, 3) is Dirty. Cleaning...
+Cell (0, 3) is now Clean.
+Step 23:
+Cell (0, 4) is already Clean.
+Step 24:
+Cell (1, 0) is Dirty. Cleaning...
+Cell (1, 0) is now Clean.
+Step 25:
+Cell (1, 1) is Dirty. Cleaning...
+Cell (1, 1) is now Clean.
+
+Final Room State:
+0 0 0 0 0
+0 0 0 0 0
+0 0 0 0 0
+0 0 0 0 0
+0 0 0 0 0
+
+
+Room cleaned in 25 steps.
