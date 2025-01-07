@@ -1,0 +1,118 @@
+import heapq
+
+class Puzzle:
+    def __init__(self, initial_state, goal_state):
+        self.initial_state = initial_state
+        self.goal_state = goal_state
+
+    def find_blank_space(self, state):
+        # Find the position of the blank space (0) in the puzzle
+        for i in range(len(state)):
+            for j in range(len(state[i])):
+                if state[i][j] == 0:
+                    return i, j
+
+    def is_goal(self, state):
+        # Check if the current state matches the goal state
+        return state == self.goal_state
+
+    def heuristic(self, state):
+        # Calculate the Manhattan distance heuristic
+        distance = 0
+        for i in range(len(state)):
+            for j in range(len(state[i])):
+                if state[i][j] != 0:  # Skip the blank space
+                    x, y = divmod(state[i][j] - 1, len(state))
+                    distance += abs(x - i) + abs(y - j)
+        return distance
+
+    def get_neighbors(self, state):
+        # Generate all possible neighbor states by sliding tiles
+        neighbors = []
+        x, y = self.find_blank_space(state)
+        directions = [(-1, 0), (1, 0), (0, -1), (0, 1)]  # Up, Down, Left, Right
+
+        for dx, dy in directions:
+            nx, ny = x + dx, y + dy
+            if 0 <= nx < len(state) and 0 <= ny < len(state[0]):
+                new_state = [row[:] for row in state]
+                new_state[x][y], new_state[nx][ny] = new_state[nx][ny], new_state[x][y]
+                neighbors.append(new_state)
+        return neighbors
+
+    def solve(self):
+        # A* algorithm
+        open_set = []
+        heapq.heappush(open_set, (0, self.initial_state))
+        came_from = {}
+        g_score = {tuple(tuple(row) for row in self.initial_state): 0}
+        f_score = {tuple(tuple(row) for row in self.initial_state): self.heuristic(self.initial_state)}
+
+        while open_set:
+            _, current = heapq.heappop(open_set)
+            current_tuple = tuple(tuple(row) for row in current)
+
+            if self.is_goal(current):
+                return self.reconstruct_path(came_from, current_tuple)
+
+            for neighbor in self.get_neighbors(current):
+                neighbor_tuple = tuple(tuple(row) for row in neighbor)
+                tentative_g_score = g_score[current_tuple] + 1
+
+                if tentative_g_score < g_score.get(neighbor_tuple, float('inf')):
+                    came_from[neighbor_tuple] = current_tuple
+                    g_score[neighbor_tuple] = tentative_g_score
+                    f_score[neighbor_tuple] = tentative_g_score + self.heuristic(neighbor)
+                    if neighbor_tuple not in [item[1] for item in open_set]:
+                        heapq.heappush(open_set, (f_score[neighbor_tuple], neighbor))
+
+        return None
+
+    def reconstruct_path(self, came_from, current):
+        # Reconstruct the path from start to goal
+        path = [current]
+        while current in came_from:
+            current = came_from[current]
+            path.append(current)
+        return path[::-1]
+
+
+# Example usage
+if __name__ == "__main__":
+    initial = [
+        [1, 2, 3],
+        [4, 0, 6],
+        [7, 5, 8]
+    ]
+    goal = [
+        [1, 2, 3],
+        [4, 5, 6],
+        [7, 8, 0]
+    ]
+
+    puzzle = Puzzle(initial, goal)
+    solution = puzzle.solve()
+
+    if solution:
+        print("Solution found:")
+        for step in solution:
+            for row in step:
+                print(row)
+            print()
+    else:
+        print("No solution exists.")
+
+
+Output:
+Solution found:
+(1, 2, 3)
+(4, 0, 6)
+(7, 5, 8)
+
+(1, 2, 3)
+(4, 5, 6)
+(7, 0, 8)
+
+(1, 2, 3)
+(4, 5, 6)
+(7, 8, 0)
