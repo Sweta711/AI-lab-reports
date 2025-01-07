@@ -1,0 +1,475 @@
+import random
+
+class ModelBasedRoomCleanerAgent:
+    def __init__(self, room_size=(10, 10)):
+        self.room_size = room_size
+        # Initialize the room as a 10x10 grid with random 0 (clean) and 1 (dirty) cells
+        self.grid = [[random.choice([0, 1]) for _ in range(room_size[1])] for _ in range(room_size[0])]
+        # Initialize the agent's position
+        self.current_position = (0, 0)  # Start from the top-left corner
+        # Internal model of the room, initialized as unknown (-1)
+        self.model = [[-1 for _ in range(room_size[1])] for _ in range(room_size[0])]
+
+    def display_room(self):
+        # Display the current status of the room grid
+        for row in self.grid:
+            print(' '.join(str(cell) for cell in row))
+        print("\n")
+
+    def display_model(self):
+        # Display the agent's internal model of the room
+        for row in self.model:
+            print(' '.join(str(cell) for cell in row))
+        print("\n")
+
+    def perceive(self):
+        # Perceive the cleanliness of the current cell
+        x, y = self.current_position
+        self.model[x][y] = self.grid[x][y]  # Update internal model
+        return self.grid[x][y]
+
+    def act(self):
+        # Perform action based on the perception (clean the cell if dirty)
+        x, y = self.current_position
+        if self.perceive() == 1:  # If the current cell is dirty (1)
+            print(f"Cell ({x}, {y}) is Dirty. Cleaning...")
+            self.grid[x][y] = 0  # Clean the cell (set to 0)
+            self.model[x][y] = 0  # Update internal model
+            print(f"Cell ({x}, {y}) is now Clean.")
+        else:
+            print(f"Cell ({x}, {y}) is already Clean.")
+
+    def move(self):
+        # Systematic movement to cover the entire grid row by row
+        x, y = self.current_position
+        if y < self.room_size[1] - 1:  # Move to the next cell in the same row
+            self.current_position = (x, y + 1)
+        elif x < self.room_size[0] - 1:  # Move to the first cell of the next row
+            self.current_position = (x + 1, 0)
+        else:
+            self.current_position = None  # All cells have been visited
+
+    def is_room_clean(self):
+        # Check if the entire room is clean
+        return all(cell == 0 for row in self.grid for cell in row)
+
+    def run(self):
+        # Display initial status of the room
+        print("Initial Room Status:")
+        self.display_room()
+
+        steps = 0
+        while not self.is_room_clean():
+            print(f"\nStep {steps + 1}:")
+            self.act()
+            self.move()
+            steps += 1
+            if self.current_position is None:
+                # Restart from the top-left corner if needed to ensure all cells are visited
+                self.current_position = (0, 0)
+
+        # Display final status of the room
+        print("\nFinal Room Status:")
+        self.display_room()
+        print(f"Room cleaned in {steps} steps.")
+        print("\nAgent's Internal Model After Cleaning:")
+        self.display_model()
+
+
+# Create and run the Model-Based Room Cleaner Agent
+agent = ModelBasedRoomCleanerAgent()
+agent.run()
+
+
+OUTPUT:
+
+Initial Room Status:
+0 1 1 1 0 1 0 0 1 0
+1 0 1 1 0 0 0 0 0 0
+1 1 1 1 0 0 0 0 1 0
+0 1 0 0 0 0 0 0 1 0
+0 0 0 0 1 0 1 1 1 1
+1 0 1 0 0 1 0 0 1 0
+1 0 0 1 0 1 1 0 0 1
+0 1 0 1 1 1 0 1 0 1
+1 0 1 0 1 1 1 1 0 1
+1 1 0 0 0 1 1 0 1 1
+
+
+
+Step 1:
+Cell (0, 0) is already Clean.
+
+Step 2:
+Cell (0, 1) is Dirty. Cleaning...
+Cell (0, 1) is now Clean.
+
+Step 3:
+Cell (0, 2) is Dirty. Cleaning...
+Cell (0, 2) is now Clean.
+
+Step 4:
+Cell (0, 3) is Dirty. Cleaning...
+Cell (0, 3) is now Clean.
+
+Step 5:
+Cell (0, 4) is already Clean.
+
+Step 6:
+Cell (0, 5) is Dirty. Cleaning...
+Cell (0, 5) is now Clean.
+
+Step 7:
+Cell (0, 6) is already Clean.
+
+Step 8:
+Cell (0, 7) is already Clean.
+
+Step 9:
+Cell (0, 8) is Dirty. Cleaning...
+Cell (0, 8) is now Clean.
+
+Step 10:
+Cell (0, 9) is already Clean.
+
+Step 11:
+Cell (1, 0) is Dirty. Cleaning...
+Cell (1, 0) is now Clean.
+
+Step 12:
+Cell (1, 1) is already Clean.
+
+Step 13:
+Cell (1, 2) is Dirty. Cleaning...
+Cell (1, 2) is now Clean.
+
+Step 14:
+Cell (1, 3) is Dirty. Cleaning...
+Cell (1, 3) is now Clean.
+
+Step 15:
+Cell (1, 4) is already Clean.
+
+Step 16:
+Cell (1, 5) is already Clean.
+
+Step 17:
+Cell (1, 6) is already Clean.
+
+Step 18:
+Cell (1, 7) is already Clean.
+
+Step 19:
+Cell (1, 8) is already Clean.
+
+Step 20:
+Cell (1, 9) is already Clean.
+
+Step 21:
+Cell (2, 0) is Dirty. Cleaning...
+Cell (2, 0) is now Clean.
+
+Step 22:
+Cell (2, 1) is Dirty. Cleaning...
+Cell (2, 1) is now Clean.
+
+Step 23:
+Cell (2, 2) is Dirty. Cleaning...
+Cell (2, 2) is now Clean.
+
+Step 24:
+Cell (2, 3) is Dirty. Cleaning...
+Cell (2, 3) is now Clean.
+
+Step 25:
+Cell (2, 4) is already Clean.
+
+Step 26:
+Cell (2, 5) is already Clean.
+
+Step 27:
+Cell (2, 6) is already Clean.
+
+Step 28:
+Cell (2, 7) is already Clean.
+
+Step 29:
+Cell (2, 8) is Dirty. Cleaning...
+Cell (2, 8) is now Clean.
+
+Step 30:
+Cell (2, 9) is already Clean.
+
+Step 31:
+Cell (3, 0) is already Clean.
+
+Step 32:
+Cell (3, 1) is Dirty. Cleaning...
+Cell (3, 1) is now Clean.
+
+Step 33:
+Cell (3, 2) is already Clean.
+
+Step 34:
+Cell (3, 3) is already Clean.
+
+Step 35:
+Cell (3, 4) is already Clean.
+
+Step 36:
+Cell (3, 5) is already Clean.
+
+Step 37:
+Cell (3, 6) is already Clean.
+
+Step 38:
+Cell (3, 7) is already Clean.
+
+Step 39:
+Cell (3, 8) is Dirty. Cleaning...
+Cell (3, 8) is now Clean.
+
+Step 40:
+Cell (3, 9) is already Clean.
+
+Step 41:
+Cell (4, 0) is already Clean.
+
+Step 42:
+Cell (4, 1) is already Clean.
+
+Step 43:
+Cell (4, 2) is already Clean.
+
+Step 44:
+Cell (4, 3) is already Clean.
+
+Step 45:
+Cell (4, 4) is Dirty. Cleaning...
+Cell (4, 4) is now Clean.
+
+Step 46:
+Cell (4, 5) is already Clean.
+
+Step 47:
+Cell (4, 6) is Dirty. Cleaning...
+Cell (4, 6) is now Clean.
+
+Step 48:
+Cell (4, 7) is Dirty. Cleaning...
+Cell (4, 7) is now Clean.
+
+Step 49:
+Cell (4, 8) is Dirty. Cleaning...
+Cell (4, 8) is now Clean.
+
+Step 50:
+Cell (4, 9) is Dirty. Cleaning...
+Cell (4, 9) is now Clean.
+
+Step 51:
+Cell (5, 0) is Dirty. Cleaning...
+Cell (5, 0) is now Clean.
+
+Step 52:
+Cell (5, 1) is already Clean.
+
+Step 53:
+Cell (5, 2) is Dirty. Cleaning...
+Cell (5, 2) is now Clean.
+
+Step 54:
+Cell (5, 3) is already Clean.
+
+Step 55:
+Cell (5, 4) is already Clean.
+
+Step 56:
+Cell (5, 5) is Dirty. Cleaning...
+Cell (5, 5) is now Clean.
+
+Step 57:
+Cell (5, 6) is already Clean.
+
+Step 58:
+Cell (5, 7) is already Clean.
+
+Step 59:
+Cell (5, 8) is Dirty. Cleaning...
+Cell (5, 8) is now Clean.
+
+Step 60:
+Cell (5, 9) is already Clean.
+
+Step 61:
+Cell (6, 0) is Dirty. Cleaning...
+Cell (6, 0) is now Clean.
+
+Step 62:
+Cell (6, 1) is already Clean.
+
+Step 63:
+Cell (6, 2) is already Clean.
+
+Step 64:
+Cell (6, 3) is Dirty. Cleaning...
+Cell (6, 3) is now Clean.
+
+Step 65:
+Cell (6, 4) is already Clean.
+
+Step 66:
+Cell (6, 5) is Dirty. Cleaning...
+Cell (6, 5) is now Clean.
+
+Step 67:
+Cell (6, 6) is Dirty. Cleaning...
+Cell (6, 6) is now Clean.
+
+Step 68:
+Cell (6, 7) is already Clean.
+
+Step 69:
+Cell (6, 8) is already Clean.
+
+Step 70:
+Cell (6, 9) is Dirty. Cleaning...
+Cell (6, 9) is now Clean.
+
+Step 71:
+Cell (7, 0) is already Clean.
+
+Step 72:
+Cell (7, 1) is Dirty. Cleaning...
+Cell (7, 1) is now Clean.
+
+Step 73:
+Cell (7, 2) is already Clean.
+
+Step 74:
+Cell (7, 3) is Dirty. Cleaning...
+Cell (7, 3) is now Clean.
+
+Step 75:
+Cell (7, 4) is Dirty. Cleaning...
+Cell (7, 4) is now Clean.
+
+Step 76:
+Cell (7, 5) is Dirty. Cleaning...
+Cell (7, 5) is now Clean.
+
+Step 77:
+Cell (7, 6) is already Clean.
+
+Step 78:
+Cell (7, 7) is Dirty. Cleaning...
+Cell (7, 7) is now Clean.
+
+Step 79:
+Cell (7, 8) is already Clean.
+
+Step 80:
+Cell (7, 9) is Dirty. Cleaning...
+Cell (7, 9) is now Clean.
+
+Step 81:
+Cell (8, 0) is Dirty. Cleaning...
+Cell (8, 0) is now Clean.
+
+Step 82:
+Cell (8, 1) is already Clean.
+
+Step 83:
+Cell (8, 2) is Dirty. Cleaning...
+Cell (8, 2) is now Clean.
+
+Step 84:
+Cell (8, 3) is already Clean.
+
+Step 85:
+Cell (8, 4) is Dirty. Cleaning...
+Cell (8, 4) is now Clean.
+
+Step 86:
+Cell (8, 5) is Dirty. Cleaning...
+Cell (8, 5) is now Clean.
+
+Step 87:
+Cell (8, 6) is Dirty. Cleaning...
+Cell (8, 6) is now Clean.
+
+Step 88:
+Cell (8, 7) is Dirty. Cleaning...
+Cell (8, 7) is now Clean.
+
+Step 89:
+Cell (8, 8) is already Clean.
+
+Step 90:
+Cell (8, 9) is Dirty. Cleaning...
+Cell (8, 9) is now Clean.
+
+Step 91:
+Cell (9, 0) is Dirty. Cleaning...
+Cell (9, 0) is now Clean.
+
+Step 92:
+Cell (9, 1) is Dirty. Cleaning...
+Cell (9, 1) is now Clean.
+
+Step 93:
+Cell (9, 2) is already Clean.
+
+Step 94:
+Cell (9, 3) is already Clean.
+
+Step 95:
+Cell (9, 4) is already Clean.
+
+Step 96:
+Cell (9, 5) is Dirty. Cleaning...
+Cell (9, 5) is now Clean.
+
+Step 97:
+Cell (9, 6) is Dirty. Cleaning...
+Cell (9, 6) is now Clean.
+
+Step 98:
+Cell (9, 7) is already Clean.
+
+Step 99:
+Cell (9, 8) is Dirty. Cleaning...
+Cell (9, 8) is now Clean.
+
+Step 100:
+Cell (9, 9) is Dirty. Cleaning...
+Cell (9, 9) is now Clean.
+
+Final Room Status:
+0 0 0 0 0 0 0 0 0 0
+0 0 0 0 0 0 0 0 0 0
+0 0 0 0 0 0 0 0 0 0
+0 0 0 0 0 0 0 0 0 0
+0 0 0 0 0 0 0 0 0 0
+0 0 0 0 0 0 0 0 0 0
+0 0 0 0 0 0 0 0 0 0
+0 0 0 0 0 0 0 0 0 0
+0 0 0 0 0 0 0 0 0 0
+0 0 0 0 0 0 0 0 0 0
+
+
+Room cleaned in 100 steps.
+
+Agent's Internal Model After Cleaning:
+0 0 0 0 0 0 0 0 0 0
+0 0 0 0 0 0 0 0 0 0
+0 0 0 0 0 0 0 0 0 0
+0 0 0 0 0 0 0 0 0 0
+0 0 0 0 0 0 0 0 0 0
+0 0 0 0 0 0 0 0 0 0
+0 0 0 0 0 0 0 0 0 0
+0 0 0 0 0 0 0 0 0 0
+0 0 0 0 0 0 0 0 0 0
+0 0 0 0 0 0 0 0 0 0
+
+
