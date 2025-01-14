@@ -1,0 +1,81 @@
+class TicTacToe:
+    def __init__(self, board, player, opponent):
+        """
+        :param board: 3x3 list representing the current state of the Tic-Tac-Toe board
+        :param player: Character representing the player's symbol (e.g., 'X' or 'O')
+        :param opponent: Character representing the opponent's symbol (e.g., 'O' or 'X')
+        """
+        self.board = board
+        self.player = player
+        self.opponent = opponent
+
+    def is_open(self, line, symbol):
+        """
+        Check if a row, column, or diagonal is open for the given symbol.
+        A line is open if it contains no opponent symbols.
+        :param line: List of three cells
+        :param symbol: Player or opponent symbol
+        :return: True if open, False otherwise
+        """
+        return all(cell == symbol or cell == ' ' for cell in line)
+
+    def calculate_heuristic(self):
+        """
+        Calculate the heuristic value of the current board state.
+        :return: Heuristic value (int)
+        """
+        player_open = 0
+        opponent_open = 0
+
+        # Check rows
+        for row in self.board:
+            if self.is_open(row, self.player):
+                player_open += 1
+            if self.is_open(row, self.opponent):
+                opponent_open += 1
+
+        # Check columns
+        for col in range(3):
+            column = [self.board[row][col] for row in range(3)]
+            if self.is_open(column, self.player):
+                player_open += 1
+            if self.is_open(column, self.opponent):
+                opponent_open += 1
+
+        # Check diagonals
+        main_diagonal = [self.board[i][i] for i in range(3)]
+        anti_diagonal = [self.board[i][2 - i] for i in range(3)]
+
+        if self.is_open(main_diagonal, self.player):
+            player_open += 1
+        if self.is_open(main_diagonal, self.opponent):
+            opponent_open += 1
+
+        if self.is_open(anti_diagonal, self.player):
+            player_open += 1
+        if self.is_open(anti_diagonal, self.opponent):
+            opponent_open += 1
+
+        # Calculate heuristic value
+        heuristic = player_open - opponent_open
+        return heuristic
+
+
+# Example Tic-Tac-Toe board
+board = [
+    ['X', 'O', ' '],
+    [' ', 'X', ' '],
+    ['O', ' ', 'X']
+]
+
+# Create an instance of the TicTacToe class
+player = 'X'
+opponent = 'O'
+game = TicTacToe(board, player, opponent)
+
+# Calculate and print the heuristic value
+heuristic_value = game.calculate_heuristic()
+print("Heuristic value of the board state:", heuristic_value)
+
+Output:
+Heuristic value of the board state: 3
