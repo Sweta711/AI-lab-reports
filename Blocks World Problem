@@ -1,0 +1,55 @@
+class BlocksWorld:
+    def __init__(self, goal_state):
+        self.goal_state = goal_state  # Define the goal state as a list of stacks
+
+    def calculate_heuristic(self, current_state):
+        """
+        Calculate the heuristic value for a given current state.
+        :param current_state: List of stacks representing the current state
+        :return: The calculated heuristic value
+        """
+        heuristic = 0
+        block_positions = {}
+
+        # Map the positions of blocks in the goal state
+        for stack_index, stack in enumerate(self.goal_state):
+            for height, block in enumerate(stack):
+                block_positions[block] = (stack_index, height)
+
+        # Evaluate the current state
+        for stack_index, stack in enumerate(current_state):
+            for height, block in enumerate(stack):
+                if block in block_positions:
+                    goal_stack, goal_height = block_positions[block]
+
+                    # If the block is in the correct position
+                    if stack_index == goal_stack and height == goal_height:
+                        heuristic += (height + 1)  # Add +1 for each block in the correct support structure
+                    else:
+                        heuristic -= (height + 1)  # Subtract -1 for each block in the wrong support structure
+
+        return heuristic
+
+
+# Define the goal and current states
+goal_state = [
+    ['A', 'B', 'C', 'D']  # A single stack with blocks in the correct order: A (bottom), B, C, D (top)
+]
+
+current_state = [
+    ['B', 'C', 'D', 'A']  # A single stack with blocks in reverse order: B (bottom), C, D, A (top)
+]
+
+# Create an instance of the BlocksWorld class
+blocks_world = BlocksWorld(goal_state)
+
+# Calculate and print the heuristic values
+start_heuristic = blocks_world.calculate_heuristic(current_state)
+goal_heuristic = blocks_world.calculate_heuristic(goal_state)
+
+print("Heuristic value of the current state:", start_heuristic)
+print("Heuristic value of the goal state:", goal_heuristic)
+
+output:
+Heuristic value of the current state: -6
+Heuristic value of the goal state: 6
