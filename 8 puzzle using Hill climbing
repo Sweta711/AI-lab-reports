@@ -1,0 +1,107 @@
+import copy
+import random
+
+class EightPuzzle:
+    def __init__(self, initial_state):
+        self.initial_state = initial_state
+        self.goal_state = [[1, 2, 3], [4, 5, 6], [7, 8, 0]]
+
+    def print_state(self, state):
+        for row in state:
+            print(row)
+        print()
+
+    def heuristic(self, state):
+        """
+        Calculate the Manhattan Distance heuristic for a given state.
+        """
+        distance = 0
+        for i in range(3):
+            for j in range(3):
+                if state[i][j] != 0:  # Ignore the blank tile
+                    goal_x, goal_y = divmod(state[i][j] - 1, 3)
+                    distance += abs(goal_x - i) + abs(goal_y - j)
+        return distance
+
+    def get_neighbors(self, state):
+        """
+        Generate all valid neighbor states by sliding tiles.
+        """
+        neighbors = []
+        # Find the position of the blank tile (0)
+        x, y = [(i, j) for i in range(3) for j in range(3) if state[i][j] == 0][0]
+
+        # Define possible moves (up, down, left, right)
+        moves = [(-1, 0), (1, 0), (0, -1), (0, 1)]
+        for dx, dy in moves:
+            nx, ny = x + dx, y + dy
+            if 0 <= nx < 3 and 0 <= ny < 3:  # Check boundaries
+                # Create a new state by swapping the blank tile
+                new_state = copy.deepcopy(state)
+                new_state[x][y], new_state[nx][ny] = new_state[nx][ny], new_state[x][y]
+                neighbors.append(new_state)
+        return neighbors
+
+    def steepest_ascent_hill_climbing(self):
+        """
+        Solve the 8-puzzle problem using Steepest Ascent Hill Climbing.
+        """
+        current_state = self.initial_state
+        current_heuristic = self.heuristic(current_state)
+
+        while True:
+            print("Current State:")
+            self.print_state(current_state)
+            print(f"Heuristic: {current_heuristic}")
+
+            # Generate neighbors and calculate their heuristic values
+            neighbors = self.get_neighbors(current_state)
+            neighbor_heuristics = [(self.heuristic(neighbor), neighbor) for neighbor in neighbors]
+
+            # Find the best neighbor
+            best_heuristic, best_neighbor = min(neighbor_heuristics, key=lambda x: x[0])
+
+            # If the best neighbor is better, move to that state
+            if best_heuristic < current_heuristic:
+                current_state = best_neighbor
+                current_heuristic = best_heuristic
+            else:
+                # No better neighbor found; terminate
+                print("Reached a peak or local optimum.")
+                break
+
+            # Check if we reached the goal
+            if current_heuristic == 0:
+                print("Goal State Reached!")
+                self.print_state(current_state)
+                return
+
+        print("Final State:")
+        self.print_state(current_state)
+
+if __name__ == "__main__":
+    initial = [
+        [1, 2, 3],
+        [4, 0, 5],
+        [7, 8, 6]
+    ]  # Example initial state
+    puzzle = EightPuzzle(initial)
+    puzzle.steepest_ascent_hill_climbing()
+
+    Output:
+Current State:
+[1, 2, 3]
+[4, 0, 5]
+[7, 8, 6]
+
+Heuristic: 2
+Current State:
+[1, 2, 3]
+[4, 5, 0]
+[7, 8, 6]
+
+Heuristic: 1
+Goal State Reached!
+[1, 2, 3]
+[4, 5, 6]
+[7, 8, 0]
